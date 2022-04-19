@@ -10,12 +10,12 @@ const Container=styled.div`
 
 `
 
-function MainPage({data,loading}) {
+function MainPage({data,handleRef}) {
   const [value, setValue]=useState()
   return (
     <Container>
-        <NavBar handelInputValue={val=>setValue(val)}/>
-       {loading?<Loading/>: <PinContainer images={data} filterVal={value}/>}
+     <NavBar handelInputValue={val=>setValue(val)}/>
+     <PinContainer images={data} filterVal={value} handleRef={handleRef}/>
     </Container>
   );
 }

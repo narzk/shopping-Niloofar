@@ -1,37 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import Loading from "./components/Loading";
 import MainPage from "./components/MainPage";
 import Pgination from "./components/Pagination";
-
+import useApi from "./hooks/useApi";
 function App() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const getUsers = async (number) => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `http://xoosha.com/ws/1/test.php?offset=${number}`
-      );
-      const data = await response.json();
-      const images = [];
-      data?.map((item) => {images.push({image:item.image_url,name: item.name, price:item.price, productPage:item.url})
+  const [pageNumber, setPageNumber] = useState(1);
+  const { loading, data } = useApi(pageNumber);
+
+  const lastElement = useCallback(
+    (node) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          setPageNumber((prevPageNumber) => prevPageNumber + 1);
+        }
       });
-      setData(images);
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    getUsers(0);
-
-  }, []);
-
+      if (node) observer.current.observe(node);
+    },
+    [loading]
+  );
+  const observer = useRef();
   return (
-     <>
-      <MainPage data={data} loading={loading}/>
-     <Pgination handleClick={(offset)=>{
-        window.scrollTo(0, 0)
-       getUsers(offset)}}/>
-     </>
+    <>
+      <MainPage data={data} loading={loading} handleRef={lastElement} />
+      {loading && <Loading />}
+    </>
   );
 }
 
